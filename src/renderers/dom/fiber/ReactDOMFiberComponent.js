@@ -918,12 +918,9 @@ var ReactDOMFiberComponent = {
             warnForPropDifference(propKey, serverValue, expectedStyle);
           }
         } else if (!DOMProperty.isReservedProp(propKey)) {
-          if (
-            !isCustomComponentTag &&
-            DOMProperty.attributeName.hasOwnProperty(propKey)
-          ) {
+          if (!isCustomComponentTag) {
             // $FlowFixMe - Should be inferred as not undefined.
-            extraAttributeNames.delete(DOMProperty.attributeName[propKey]);
+            extraAttributeNames.delete(DOMProperty.getAttributeName(propKey));
             serverValue = DOMPropertyOperations.getValueForProperty(
               domElement,
               propKey,

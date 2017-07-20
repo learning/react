@@ -126,7 +126,7 @@ var DOMPropertyOperations = {
           return stringValue;
         }
       } else if (!DOMProperty.isReservedProp(name)) {
-        return DOMPropertyOperations.diffValueForAttribute(
+        return DOMPropertyOperations.getValueForAttribute(
           node,
           name,
           expected,
@@ -164,18 +164,20 @@ var DOMPropertyOperations = {
    * @param {*} value
    */
   setValueForProperty: function(node, name, value) {
-    if (DOMProperty.useMutationMethod(name)) {
-      DOMProperty.mutationMethod[name](node, value);
-    } else if (shouldIgnoreValue(name, value)) {
-      DOMPropertyOperations.deleteValueForProperty(node, name);
-      return;
-    } else if (DOMProperty.useProperty(name)) {
-      // Contrary to `setAttribute`, object properties are properly
-      // `toString`ed by IE8/9.
-      node[name] = value;
-    } else if (!DOMProperty.isReservedProp(name)) {
-      DOMPropertyOperations.setValueForAttribute(node, name, value);
-      return;
+    if (!DOMProperty.isReservedProp(name)) {
+      if (DOMProperty.useMutationMethod(name)) {
+        DOMProperty.mutationMethod[name](node, value);
+      } else if (shouldIgnoreValue(name, value)) {
+        DOMPropertyOperations.deleteValueForProperty(node, name);
+        return;
+      } else if (DOMProperty.useProperty(name)) {
+        // Contrary to `setAttribute`, object properties are properly
+        // `toString`ed by IE8/9.
+        node[name] = value;
+      } else {
+        DOMPropertyOperations.setValueForAttribute(node, name, value);
+        return;
+      }
     }
 
     if (__DEV__) {
@@ -202,10 +204,7 @@ var DOMPropertyOperations = {
         attributeName,
         '' + value,
       );
-    } else if (
-      DOMProperty.isBooleanValue(name) ||
-      (DOMProperty.isOverloadedBooleanValue(name) && value === true)
-    ) {
+    } else if (DOMProperty.needsEmptyStringValue(name, value)) {
       node.setAttribute(attributeName, '');
     } else if (value == null) {
       node.removeAttribute(attributeName);
@@ -248,12 +247,14 @@ var DOMPropertyOperations = {
    * @param {string} name
    */
   deleteValueForProperty: function(node, name) {
-    if (DOMProperty.useMutationMethod(name)) {
-      DOMProperty.mutationMethod[name](node, undefined);
-    } else if (DOMProperty.useProperty(name)) {
-      node[name] = DOMProperty.isBooleanValue(name) ? false : '';
-    } else if (!DOMProperty.isReservedProp(name)) {
-      node.removeAttribute(DOMProperty.getAttributeName(name));
+    if (!DOMProperty.isReservedProp(name)) {
+      if (DOMProperty.useMutationMethod(name)) {
+        DOMProperty.mutationMethod[name](node, undefined);
+      } else if (DOMProperty.useProperty(name)) {
+        node[name] = DOMProperty.isBooleanValue(name) ? false : '';
+      } else {
+        node.removeAttribute(DOMProperty.getAttributeName(name));
+      }
     }
 
     if (__DEV__) {

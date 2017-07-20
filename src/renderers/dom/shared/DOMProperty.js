@@ -178,7 +178,7 @@ var DOMProperty = {
     xmlBase: 'xml:base',
     xmlnsXlink: 'xmlns:xlink',
     xmlLang: 'xml:lang',
-    xmlSpace: 'xml:space',
+    xmlSpace: 'xml:space'
   },
 
   attributeNamespace: {
@@ -343,6 +343,13 @@ var DOMProperty = {
   useMutationMethod(name) {
     return DOMProperty.mutationMethod.hasOwnProperty(name);
   },
+
+  needsEmptyStringValue (name, value) {
+    return (
+      DOMProperty.isBooleanValue(name) ||
+      (DOMProperty.isOverloadedBooleanValue(name) && value === true)
+    )
+  }
 };
 
 module.exports = DOMProperty;

@@ -86,28 +86,21 @@ var DOMMarkupOperations = {
    * @return {?string} Markup string, or null if the property was invalid.
    */
   createMarkupForProperty: function(name, value) {
-    if (!DOMProperty.isReservedProp(name)) {
-      if (shouldIgnoreValue(name, value)) {
-        return '';
-      }
-
-      var attributeName = DOMProperty.getAttributeName(name);
-
-      if (
-        DOMProperty.isBooleanValue(name) ||
-        (DOMProperty.isOverloadedBooleanValue(name) && value === true)
-      ) {
-        return attributeName + '=""';
-      }
-
-      return attributeName + '=' + quoteAttributeValueForBrowser(value);
-    } else if (!DOMProperty.isReservedProp(name)) {
-      if (value == null) {
-        return '';
-      }
-      return name + '=' + quoteAttributeValueForBrowser(value);
+    if (DOMProperty.isReservedProp(name)) {
+      return null
+    } else if (shouldIgnoreValue(name, value)) {
+      return '';
     }
-    return null;
+
+    var attributeName = DOMProperty.getAttributeName(name);
+
+    if (DOMProperty.needsEmptyStringValue(name, value)) {
+      return attributeName + '=""';
+    } else if (value == null) {
+      return '';
+    }
+
+    return attributeName + '=' + quoteAttributeValueForBrowser(value);
   },
 
   /**
