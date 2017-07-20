@@ -115,9 +115,7 @@ describe('DOMPropertyOperations', () => {
     it('should use mutation method where applicable', () => {
       var foobarSetter = jest.fn();
       // inject foobar DOM property
-      DOMProperty.properties.foobar = {
-        mutationMethod: foobarSetter,
-      };
+      DOMProperty.mutationMethod.foobar = foobarSetter;
 
       DOMPropertyOperations.setValueForProperty(
         stubNode,
